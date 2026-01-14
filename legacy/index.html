@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub Contribution Graph Art Designer</title>
+    <link rel="stylesheet" href="./styles.css">
+</head>
+
+<body data-theme="dark">
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🎨 GitHub Contribution Graph Art</h1>
+            <p data-i18n="subtitle">Create unique art on your GitHub profile</p>
+            <div class="header-controls">
+                <button class="theme-toggle" onclick="toggleTheme()">
+                    <span class="theme-icon">🌙</span>
+                    <span data-i18n="theme">Theme</span>
+                </button>
+                <button class="lang-toggle" onclick="toggleLanguage()">
+                    <span>🌐</span>
+                    <span data-i18n="language">Language</span>
+                </button>
+                <button class="settings-toggle" onclick="toggleSettings()">
+                    <span>⚙️</span>
+                    <span data-i18n="settings">Settings</span>
+                </button>
+                <button class="export-toggle" onclick="toggleExport()">
+                    <span>📤</span>
+                    <span data-i18n="export">Export</span>
+                </button>
+                <button id="undo-btn" onclick="StateManager.undo()" disabled title="Отменить (Ctrl+Z)">
+                    <span>↩️</span>
+                    <span data-i18n="undo">Undo</span>
+                </button>
+                <button id="redo-btn" onclick="StateManager.redo()" disabled title="Повторить (Ctrl+Y)">
+                    <span>↪️</span>
+                    <span data-i18n="redo">Redo</span>
+                </button>
+            </div>
+            <div class="current-date">
+                <span data-i18n="today">Today:</span> <span id="current-date"></span>
+            </div>
+        </div>
+
+        <!-- Info Box -->
+        <div class="info-box">
+            <h4 data-i18n="how_it_works">💡 How it works</h4>
+            <p data-i18n="description">By default shows the last 365 days. When selecting a specific year, displays the
+                full calendar year. Use Layout to overlay multiple years. Import your real GitHub data, draw custom
+                patterns, or use predefined templates.</p>
+            <div class="info-features">
+                <div class="feature-item">
+                    <span class="feature-icon">📊</span>
+                    <span data-i18n="feature_import">Import GitHub data</span>
+                </div>
+                <div class="feature-item">
+                    <span class="feature-icon">🎨</span>
+                    <span data-i18n="feature_patterns">Pre-made patterns</span>
+                </div>
+                <div class="feature-item">
+                    <span class="feature-icon">🖌️</span>
+                    <span data-i18n="feature_custom">Custom drawing</span>
+                </div>
+                <div class="feature-item">
+                    <span class="feature-icon">📅</span>
+                    <span data-i18n="feature_multiyear">Multi-year support</span>
+                </div>
+                <div class="feature-item">
+                    <span class="feature-icon">🔧</span>
+                    <span data-i18n="feature_drag">Drag & Drop patterns</span>
+                </div>
+                <div class="feature-item">
+                    <span class="feature-icon">🌐</span>
+                    <span data-i18n="feature_export">Export to Git scripts</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Graph Container -->
+        <div class="graph-container show-layers-toggle" id="graph-container">
+            <div class="graph-header">
+                <div class="graph-title">
+                    <span id="total-contributions">0</span> <span data-i18n="contributions">contributions</span> <span id="period-text" data-i18n="in_last_year">in the last year</span>
+                </div>
+                <div class="graph-controls">
+                    <div class="dropdown">
+                        <div class="dropdown-btn" onclick="toggleLayoutDropdown()">
+                            <span id="selected-layout" data-i18n="single_year">Single Year</span>
+                        </div>
+                        <div class="dropdown-options" id="layout-options">
+                            <div class="dropdown-option active" data-layout="single" data-i18n="single_year">Single Year
+                            </div>
+                            <div class="dropdown-option" data-layout="multi" data-i18n="multi_year">Multi Year</div>
+                        </div>
+                    </div>
+                    <div class="dropdown">
+                        <div class="dropdown-btn" id="single-year-dropdown" onclick="toggleYearDropdown()">
+                            <span id="selected-year" data-i18n="last_year">Last Year</span>
+                        </div>
+                        <div class="dropdown-options" id="single-year-options">
+                            <div class="dropdown-option active" data-year="last" data-i18n="last_year">Last Year</div>
+                            <div class="dropdown-option" data-year="2022">2022</div>
+                            <div class="dropdown-option" data-year="2023">2023</div>
+                            <div class="dropdown-option" data-year="2024">2024</div>
+                            <div class="dropdown-option" data-year="2025">2025</div>
+                            <div class="dropdown-option" data-year="2026">2026</div>
+                            <div class="dropdown-option" data-year="2027">2027</div>
+                        </div>
+                        <div class="dropdown-btn" id="multi-mode-dropdown" onclick="toggleMultiModeDropdown()" style="display: none;">
+                            <span id="selected-multi-mode" data-i18n="overlay">Overlay</span>
+                        </div>
+                        <div class="dropdown-options" id="multi-mode-options">
+                            <div class="dropdown-option active" data-mode="overlay" data-i18n="overlay">Overlay</div>
+                            <div class="dropdown-option" data-mode="continuation" data-i18n="continuation">Continuation
+                            </div>
+                        </div>
+                    </div>
+                    <button class="layers-toggle" onclick="toggleLayers()" style="display: none;">
+                        <span>📚</span>
+                        <span id="layers-toggle-text" data-i18n="layers">Layers</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Palette -->
+            <div class="palette-container">
+                <div class="palette">
+                    <span class="palette-label" data-i18n="less">Less</span>
+                    <div class="brush-btn active" data-level="0" title="0 commits"></div>
+                    <div class="brush-btn" data-level="1" title="1-3 commits"></div>
+                    <div class="brush-btn" data-level="2" title="4-6 commits"></div>
+                    <div class="brush-btn" data-level="3" title="7-9 commits"></div>
+                    <div class="brush-btn" data-level="4" title="10+ commits"></div>
+                    <span class="palette-label" data-i18n="more">More</span>
+                </div>
+                <div class="multi-year-selector" id="multi-year-selector">
+                    <h4 style="color: var(--text-accent); position: absolute; top: 80px;" data-i18n="select_years">Select years for
+                        overlay (Ctrl+click)</h4>
+                    <div class="year-grid" id="year-grid">
+                        <div class="year-item" data-year="2020">2020</div>
+                        <div class="year-item" data-year="2021">2021</div>
+                        <div class="year-item" data-year="2022">2022</div>
+                        <div class="year-item" data-year="2023">2023</div>
+                        <div class="year-item" data-year="2024">2024</div>
+                        <div class="year-item" data-year="2025">2025</div>
+                        <div class="year-item" data-year="2026">2026</div>
+                        <div class="year-item" data-year="2027">2027</div>
+                    </div>
+                </div>
+                <div class="palette-actions">
+                    <button onclick="clearGrid()" class="secondary" data-i18n="clear">Clear</button>
+                    <button onclick="fillRandom()" class="secondary" data-i18n="random">Random</button>
+                </div>
+            </div>
+
+
+
+            <!-- Contributions Grid -->
+            <div class="contributions-wrapper">
+                <div class="layers-container" id="layers-container">
+                    <div class="contributions-scroll">
+                        <div class="contributions-grid" id="contributions-chart">
+                            <!-- Grid will be generated by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Patterns -->
+        <div class="patterns">
+            <!-- Heart Pattern -->
+            <div class="pattern-card" onclick="selectPattern('heart')">
+                <div class="pattern-preview" id="heart-preview" draggable="true" ondragstart="dragStart(event, 'heart')"></div>
+                <h4 data-i18n="pattern_heart">Heart</h4>
+                <p data-i18n="pattern_heart_desc">Romantic single object pattern</p>
+                <div class="pattern-settings" id="heart-settings">
+                    <div class="pattern-controls">
+                        <div class="pattern-control">
+                            <label data-i18n="size">Size: <span class="range-value" id="heart-size-value">1</span></label>
+                            <input type="range" min="1" max="3" value="1" id="heart-size" oninput="updateRangeValue('heart-size', 'heart-size-value')">
+                        </div>
+                        <div class="pattern-control">
+                            <label data-i18n="intensity">Intensity: <span class="range-value" id="heart-intensity-value">3</span></label>
+                            <input type="range" min="1" max="4" value="3" id="heart-intensity" oninput="updateRangeValue('heart-intensity', 'heart-intensity-value')">
+                        </div>
+                        <div class="pattern-control">
+                            <label data-i18n="position">Position:</label>
+                            <select id="heart-position">
+                                <option value="center" data-i18n="center">Center</option>
+                                <option value="left" data-i18n="left">Left</option>
+                                <option value="right" data-i18n="right">Right</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button onclick="applyPattern('heart')" data-i18n="apply">Apply</button>
+                </div>
+            </div>
+
+            <!-- Wave Pattern -->
+            <div class="pattern-card" onclick="selectPattern('wave')">
+                <div class="pattern-preview" id="wave-preview" draggable="true" ondragstart="dragStart(event, 'wave')">
+                </div>
+                <h4 data-i18n="pattern_wave">Wave</h4>
+                <p data-i18n="pattern_wave_desc">Smooth repeating wave pattern</p>
+                <div class="pattern-settings" id="wave-settings">
+                    <div class="pattern-controls">
+                        <div class="pattern-control">
+                            <label data-i18n="frequency">Frequency: <span class="range-value" id="wave-frequency-value">5</span></label>
+                            <input type="range" min="1" max="10" value="5" id="wave-frequency" oninput="updateRangeValue('wave-frequency', 'wave-frequency-value')">
+                        </div>
+                        <div class="pattern-control">
+                            <label data-i18n="intensity">Intensity: <span class="range-value" id="wave-intensity-value">3</span></label>
+                            <input type="range" min="1" max="4" value="3" id="wave-intensity" oninput="updateRangeValue('wave-intensity', 'wave-intensity-value')">
+                        </div>
+                        <div class="pattern-control">
+                            <label data-i18n="repeat">Repeat: <span class="range-value" id="wave-repeat-value">1</span></label>
+                            <input type="range" min="1" max="5" value="1" id="wave-repeat" oninput="updateRangeValue('wave-repeat', 'wave-repeat-value')">
+                        </div>
+                    </div>
+                    <button onclick="applyPattern('wave')" data-i18n="apply">Apply</button>
+                </div>
+            </div>
+
+            <!-- Stripes Pattern -->
+            <div class="pattern-card" onclick="selectPattern('stripes')">
+                <div class="pattern-preview" id="stripes-preview" draggable="true" ondragstart="dragStart(event, 'stripes')"></div>
+                <h4 data-i18n="pattern_stripes">Stripes</h4>
+                <p data-i18n="pattern_stripes_desc">Repeating stripe pattern</p>
+                <div class="pattern-settings" id="stripes-settings">
+                    <div class="pattern-controls">
+                        <div class="pattern-control">
+                            <label data-i18n="frequency">Width: <span class="range-value" id="stripes-frequency-value">3</span></label>
+                            <input type="range" min="1" max="10" value="3" id="stripes-frequency" oninput="updateRangeValue('stripes-frequency', 'stripes-frequency-value')">
+                        </div>
+                        <div class="pattern-control">
+                            <label data-i18n="intensity">Intensity: <span class="range-value" id="stripes-intensity-value">2</span></label>
+                            <input type="range" min="1" max="4" value="2" id="stripes-intensity" oninput="updateRangeValue('stripes-intensity', 'stripes-intensity-value')">
+                        </div>
+                        <div class="pattern-control">
+                            <label data-i18n="repeat">Direction:</label>
+                            <select id="stripes-repeat">
+                                <option value="1" data-i18n="horizontal">Horizontal</option>
+                                <option value="2" data-i18n="vertical">Vertical</option>
+                                <option value="3" data-i18n="diagonal">Diagonal</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button onclick="applyPattern('stripes')" data-i18n="apply">Apply</button>
+                </div>
+            </div>
+
+            <!-- Text Pattern -->
+            <div class="pattern-card" onclick="selectPattern('text')">
+                <div class="pattern-preview" id="text-preview" draggable="true" ondragstart="dragStart(event, 'text')">
+                </div>
+                <h4 data-i18n="pattern_text">Text</h4>
+                <p data-i18n="pattern_text_desc">Custom text single object</p>
+                <div class="pattern-settings" id="text-settings">
+                    <div class="pattern-controls">
+                        <div class="pattern-control">
+                            <label data-i18n="text">Text:</label>
+                            <input type="text" id="text-size" placeholder="Enter text" value="HELLO">
+                        </div>
+                        <div class="pattern-control">
+                            <label data-i18n="intensity">Intensity: <span class="range-value" id="text-intensity-value">3</span></label>
+                            <input type="range" min="1" max="4" value="3" id="text-intensity" oninput="updateRangeValue('text-intensity', 'text-intensity-value')">
+                        </div>
+                        <div class="pattern-control">
+                            <label data-i18n="position">Position:</label>
+                            <select id="text-position">
+                                <option value="center" data-i18n="center">Center</option>
+                                <option value="left" data-i18n="left">Left</option>
+                                <option value="right" data-i18n="right">Right</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button onclick="applyPattern('text')" data-i18n="apply">Apply</button>
+                </div>
+            </div>
+
+            <!-- Custom Pattern -->
+            <div class="pattern-card custom" onclick="selectPattern('custom')">
+                <div class="pattern-preview" id="custom-preview" draggable="true" ondragstart="dragStart(event, 'custom')">
+                    <div style="color: var(--text-secondary); font-size: 12px;" data-i18n="draw_your_own">Draw your own
+                    </div>
+                </div>
+                <h4 data-i18n="pattern_custom">Custom Pattern</h4>
+                <p data-i18n="pattern_custom_desc">Create your own pattern</p>
+                <div class="pattern-settings" id="custom-settings">
+                    <div class="custom-pattern-creator">
+                        <label data-i18n="pattern_name">Pattern Name:</label>
+                        <input type="text" id="custom-size" placeholder="My Pattern" style="margin: 10px 0;">
+                        <div class="pattern-grid" id="custom-pattern-grid"></div>
+                        <div class="pattern-controls">
+                            <div class="pattern-control">
+                                <label data-i18n="intensity">Intensity: <span class="range-value" id="custom-intensity-value">3</span></label>
+                                <input type="range" min="1" max="4" value="3" id="custom-intensity" oninput="updateRangeValue('custom-intensity', 'custom-intensity-value')">
+                            </div>
+                            <div class="pattern-control">
+                                <label data-i18n="position">Position:</label>
+                                <select id="custom-position">
+                                    <option value="center" data-i18n="center">Center</option>
+                                    <option value="left" data-i18n="left">Left</option>
+                                    <option value="right" data-i18n="right">Right</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button onclick="saveCustomPattern()" data-i18n="save_pattern">Save Pattern</button>
+                    </div>
+                    <button onclick="applyPattern('custom')" data-i18n="apply">Apply</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Panel -->
+    <div class="settings-panel" id="settings-panel">
+        <div class="settings-header">
+            <h3 data-i18n="settings">Settings</h3>
+            <button class="close-settings" onclick="toggleSettings()">×</button>
+        </div>
+
+        <div class="settings-section">
+            <h4 data-i18n="github_import">GitHub Import</h4>
+            <div class="github-import">
+                <div class="github-form">
+                    <input type="text" id="github-username" placeholder="GitHub username" data-i18n-placeholder="github_username">
+                    <input type="text" id="github-token" placeholder="GitHub token (optional)" data-i18n-placeholder="github_token">
+                    <button onclick="importFromGitHub()" data-i18n="import_github">Import from GitHub</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="settings-section">
+            <h4 data-i18n="general_settings">General Settings</h4>
+            <div class="checkbox-group">
+                <input type="checkbox" id="only-past" checked>
+                <label for="only-past" data-i18n="only_past_days">Only past days</label>
+            </div>
+            <div class="checkbox-group">
+                <input type="checkbox" id="auto-save" checked>
+                <label for="auto-save" data-i18n="auto_save">Auto-save progress</label>
+            </div>
+        </div>
+
+        <div class="settings-section">
+            <h4 data-i18n="import_export">Import & Export</h4>
+            <button onclick="importJSON()" class="secondary" data-i18n="import_json">Import JSON</button>
+            <input type="file" id="json-import" accept=".json" style="display: none;" onchange="handleJSONImport(event)">
+        </div>
+    </div>
+
+    <!-- Export Panel -->
+    <div class="export-panel" id="export-panel">
+        <div class="export-header">
+            <h3 data-i18n="export">Export</h3>
+            <button class="close-export" onclick="toggleExport()">×</button>
+        </div>
+
+        <div class="export-options">
+            <button onclick="exportScript()" data-i18n="export_script">⚙️ Shell Script</button>
+            <button onclick="exportJSON()" data-i18n="export_json">📄 JSON Data</button>
+            <button onclick="saveImage()" data-i18n="export_image">🖼️ PNG Image</button>
+            <button onclick="exportCSV()" data-i18n="export_csv">📊 CSV Data</button>
+        </div>
+    </div>
+
+    <!-- Notification -->
+    <div class="notification" id="notification"></div>
+    <script src="./index.js"></script>
+</body>
+
+</html>
+
+</html>
