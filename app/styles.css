@@ -1,0 +1,181 @@
+/* Стили для паттернов */
+.pattern-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.pattern-button {
+    padding: 8px 12px;
+    background-color: var(--secondary-color);
+    color: var(--text-color);
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    position: relative;
+}
+
+.pattern-button:hover {
+    background-color: var(--accent-color);
+}
+
+.pattern-button.custom-pattern {
+    background-color: var(--custom-pattern-color, #5a6d8f);
+    padding-right: 30px;
+}
+
+.delete-pattern {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 16px;
+    color: rgba(255, 255, 255, 0.7);
+    cursor: pointer;
+}
+
+.delete-pattern:hover {
+    color: #ff6b6b;
+}
+
+.pattern-preview {
+    width: 200px;
+    height: 100px;
+    background-color: var(--bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    margin-bottom: 15px;
+    display: none;
+    padding: 5px;
+}
+
+.pattern-matrix {
+    display: grid;
+    width: 100%;
+    height: 100%;
+    gap: 1px;
+}
+
+.pattern-cell {
+    background-color: var(--contribution-0);
+    border-radius: 2px;
+}
+
+.pattern-controls {
+    margin-bottom: 20px;
+    padding: 15px;
+    background-color: var(--bg-color-secondary);
+    border-radius: 4px;
+}
+
+#single-pattern-controls,
+#repeating-pattern-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    align-items: center;
+}
+
+.custom-pattern-section {
+    margin-top: 20px;
+    padding: 15px;
+    background-color: var(--bg-color-secondary);
+    border-radius: 4px;
+}
+
+.input-group {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.input-group input {
+    flex: 1;
+    padding: 8px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background-color: var(--input-bg-color);
+    color: var(--text-color);
+}
+
+.pattern-import-export {
+    display: flex;
+    gap: 10px;
+}
+
+/* Стили для экспорта */
+.export-options {
+    margin-bottom: 20px;
+    padding: 15px;
+    background-color: var(--bg-color-secondary);
+    border-radius: 4px;
+}
+
+.option-group {
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.export-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.export-button {
+    padding: 10px 15px;
+    background-color: var(--accent-color);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.export-button:hover {
+    background-color: var(--accent-color-hover);
+}
+
+#export-png {
+    background-color: #4CAF50;
+}
+
+#export-png:hover {
+    background-color: #3e8e41;
+}
+
+#export-jpeg {
+    background-color: #2196F3;
+}
+
+#export-jpeg:hover {
+    background-color: #0b7dda;
+}
+
+#export-svg {
+    background-color: #ff9800;
+}
+
+#export-svg:hover {
+    background-color: #e68a00;
+}
+
+/* Добавляем переменные для цветов */
+:root {
+    /* ... existing variables ... */
+    --custom-pattern-color: #5a6d8f;
+    --input-bg-color: #2d333b;
+    --accent-color-hover: #4a6da3;
+}
+
+/* Стили для темной темы */
+@media (prefers-color-scheme: dark) {
+    :root {
+        /* ... existing variables ... */
+        --custom-pattern-color: #4a5d7f;
+        --input-bg-color: #22272e;
+    }
+} 
