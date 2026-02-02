@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>2D Layered Grid</title>
+  <style>
+    /* центрируем и базовые стили */
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      background: #f0f0f0;
+      font-family: sans-serif;
+    }
+    button {
+      margin-bottom: 1rem;
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+    }
+
+    /* контейнер для «слоёв» */
+    .container {
+      width: 200px;
+      height: 200px;
+      position: relative;
+      overflow: visible;
+    }
+
+    /* сама сетка слоёв */
+    .grid {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      transition: all 0.3s ease;
+    }
+
+    /* общий слой */
+    .layer {
+      --tx: 0px;
+      --ty: 0px;
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      display: grid;
+      grid-template: 1fr 1fr / 1fr 1fr;
+      transform: translate(var(--tx), var(--ty)) scale(1);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      z-index: 1;
+    }
+
+    /* задаём смещения для каждого слоя */
+    .show-layers .layer:nth-child(1) { --tx:   1px; --ty:   1px; }
+    .show-layers .layer:nth-child(2) { --tx:  20px; --ty:  20px; }
+    .show-layers .layer:nth-child(3) { --tx:  40px; --ty:  40px; }
+    .show-layers .layer:nth-child(4) { --tx:  60px; --ty:  60px; }
+
+    /* клетки внутри слоя */
+    .cell {
+      border: 1px solid #333;
+      box-sizing: border-box;
+    }
+    .filled {
+      background: rgba(0,150,250,0.8);
+    }
+
+    /* при наведении поднимаем слой «выше» и немного масштабируем */
+    .layer:hover {
+      transform: translate(var(--tx), var(--ty));
+      z-index: 100;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <button id="toggle">Показать слои</button>
+  <div class="container">
+    <div class="grid">
+      <div class="layer">
+        <div class="cell filled"></div>
+        <div class="cell"></div>
+        <div class="cell"></div>
+        <div class="cell filled"></div>
+      </div>
+      <div class="layer">
+        <div class="cell"></div>
+        <div class="cell filled"></div>
+        <div class="cell filled"></div>
+        <div class="cell"></div>
+      </div>
+      <div class="layer">
+        <div class="cell filled"></div>
+        <div class="cell filled"></div>
+        <div class="cell"></div>
+        <div class="cell"></div>
+      </div>
+      <div class="layer">
+        <div class="cell"></div>
+        <div class="cell"></div>
+        <div class="cell filled"></div>
+        <div class="cell filled"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const btn = document.getElementById('toggle');
+    const grid = document.querySelector('.grid');
+
+    btn.addEventListener('click', () => {
+      grid.classList.toggle('show-layers');
+      btn.textContent = grid.classList.contains('show-layers')
+        ? 'Скрыть слои'
+        : 'Показать слои';
+    });
+  </script>
+</body>
+</html>
